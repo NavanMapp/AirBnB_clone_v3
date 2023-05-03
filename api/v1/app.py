@@ -1,50 +1,45 @@
 #!/usr/bin/python3
-'''Contains a Flask web application API.
-'''
-import os
-from flask import Flask, jsonify
-from flask_cors import CORS
-
-from models import storage
-from api.v1.views import app_views
-
-
-app = Flask(__name__)
-'''The Flask web application instance.'''
-app_host = os.getenv('HBNB_API_HOST', '0.0.0.0')
-app_port = int(os.getenv('HBNB_API_PORT', '5000'))
-app.url_map.strict_slashes = False
-app.register_blueprint(app_views)
-CORS(app, resources={'/*': {'origins': app_host}})
+"""
+Unit Test for api v1 Flask App
+"""
+from api.v1 import app
+import inspect
+import pep8
+import unittest
 
 
-@app.teardown_appcontext
-def teardown_flask(exception):
-    '''The Flask app/request context end event listener.'''
-    # print(exception)
-    storage.close()
+class TestAppDocs(unittest.TestCase):
+    """Class for testing Flask App docs"""
 
+    all_funcs = inspect.getmembers(app, inspect.isfunction)
 
-@app.errorhandler(404)
-def error_404(error):
-    '''Handles the 404 HTTP error code.'''
-    return jsonify(error='Not found'), 404
+    @classmethod
+    def setUpClass(cls):
+        print('\n\n.................................')
+        print('..... Testing Documentation .....')
+        print('........  For Flask App  ........')
+        print('.................................\n\n')
 
+    def test_doc_file(self):
+        """... documentation for the file"""
+        actual = app.__doc__
+        self.assertIsNotNone(actual)
 
-@app.errorhandler(400)
-def error_400(error):
-    '''Handles the 400 HTTP error code.'''
-    msg = 'Bad request'
-    if isinstance(error, Exception) and hasattr(error, 'description'):
-        msg = error.description
-    return jsonify(error=msg), 400
+    def test_all_function_docs(self):
+        """... tests for ALL DOCS for all functions in db_storage file"""
+        all_functions = TestAppDocs.all_funcs
+        for function in all_functions:
+            self.assertIsNotNone(function[1].__doc__)
+
+    def test_pep8_app(self):
+        """... app.py conforms to PEP8 Style"""
+        pep8style = pep8.StyleGuide(quiet=True)
+        errors = pep8style.check_files(['api/v1/app.py'])
+        self.assertEqual(errors.total_errors, 0, errors.messages)
 
 
 if __name__ == '__main__':
-    app_host = os.getenv('HBNB_API_HOST', '0.0.0.0')
-    app_port = int(os.getenv('HBNB_API_PORT', '5000'))
-    app.run(
-        host=app_host,
-        port=app_port,
-        threaded=True
-    )
+    """
+    MAIN TESTS
+    """
+    unittest.main
